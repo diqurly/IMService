@@ -18,7 +18,6 @@ public interface Component {
 	 * @param packet
 	 */
 	public void packagePacket(Packet packet,BlockingQueue<Packet> queue);
-	public void packagePacket(Packet packet);
 
 	/**
 	 * 发送消息，阻塞模式

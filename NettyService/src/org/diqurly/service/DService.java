@@ -8,6 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.net.ssl.SSLException;
 
+import org.diqurly.config.ConfiguratorAbstract;
 import org.diqurly.connect.ConnectManage;
 import org.diqurly.connect.ConnectServerHandler;
 import org.diqurly.connect.thread.CacheConnectThread;
@@ -16,8 +17,14 @@ import org.diqurly.route.MessageRouteThread;
 import org.diqurly.user.UserManage;
 
 public class DService {
+	private static ConfiguratorAbstract config;
 
 	public static void main(String[] args) {
+		
+		config=new ConfiguratorAbstract();
+		config.init(args);
+		
+		
 		ConnectManage<Channel> connectMange = new ConnectManage<Channel>();
 
 		UserManage<Channel> userManage = new UserManage<Channel>();
@@ -42,4 +49,9 @@ public class DService {
 		}
 
 	}
+
+	public static ConfiguratorAbstract getConfigurator() {
+		return config;
+	}
+
 }

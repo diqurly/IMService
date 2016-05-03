@@ -1,6 +1,5 @@
 package org.diqurly.packet;
 
-import org.json.JSONException;
 
 /**
  * ´íÎóÏûÏ¢
@@ -26,12 +25,12 @@ public class Error extends Packet{
 		this.code = code;
 	}
 
-	public Error() throws JSONException {
+	public Error() {
 		super();
 		this.type = "error";
 	}
 
-	public Error(int code) throws JSONException {
+	public Error(int code) {
 		super();
 		this.type = "error";
 		this.code = code;

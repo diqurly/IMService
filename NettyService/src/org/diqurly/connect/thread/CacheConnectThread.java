@@ -7,8 +7,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.json.JSONException;
-
 /**
  * 缓存处理线程
  * 
@@ -28,12 +26,7 @@ public class CacheConnectThread<E extends Channel> extends Thread {
 
 	public CacheConnectThread(ConcurrentHashMap<E, Long> connects) {
 		this.connects = connects;
-		try {
-			errorMsg=new org.diqurly.packet.Error(1100).toJson();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		errorMsg = new org.diqurly.packet.Error(1100).toJson();
 		this.setName("CacheConnectThread");
 	}
 

@@ -12,6 +12,12 @@ import org.diqurly.packet.PacketPackage;
 import org.diqurly.user.UserManage;
 import org.diqurly.user.UserSerializable;
 
+/**
+ * c/s 连接管理服务器
+ * 
+ * @author diqurly
+ *
+ */
 public class ConnectServerHandler extends DhandlerInterface {
 
 	private ConnectManage<Channel> connectMange;
@@ -25,10 +31,7 @@ public class ConnectServerHandler extends DhandlerInterface {
 		this.userManage = userManage;
 		this.queue = queue;
 	}
-/**
- * new
- * @return
- */
+
 	public DhandlerInterface newHandler() {
 		return new ConnectServerHandler(connectMange, userManage, queue);
 	}

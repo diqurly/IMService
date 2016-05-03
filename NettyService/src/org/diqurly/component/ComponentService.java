@@ -3,8 +3,12 @@ package org.diqurly.component;
 import java.util.concurrent.BlockingQueue;
 
 import org.diqurly.packet.Packet;
-
-public  class ComponentService implements Component{
+/**
+ * 组件基类
+ * @author diqurly
+ *
+ */
+public abstract class ComponentService implements Component{
 private BlockingQueue<Packet> queue;
 	@Override
 	public String getName() {
@@ -31,9 +35,5 @@ private BlockingQueue<Packet> queue;
 		//假如组件阻塞后怎么办？？？
 	}
 
-	@Override
-	public void packagePacket(Packet packet) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 }

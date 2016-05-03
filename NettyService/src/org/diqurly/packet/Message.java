@@ -5,7 +5,7 @@ import org.json.JSONObject;
 
 public class Message extends Packet {
 
-	public Message() throws JSONException {
+	public Message() {
 		super();
 		// TODO Auto-generated constructor stub
 	}

@@ -1,6 +1,5 @@
 package org.diqurly.packet;
 
-import org.json.JSONException;
 
 /**
  * Á¬½Ó×´Ì¬
@@ -21,7 +20,7 @@ public class Pressence extends Packet{
 	}
 
 
-	public Pressence() throws JSONException
+	public Pressence()
 	{
 		super();
 		this.type="pressence";

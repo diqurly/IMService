@@ -53,5 +53,10 @@
 	<classpathentry kind="lib" path="lib/tomcat-jni-8.0.27.jar"/>
 	<classpathentry kind="lib" path="lib/xbean-spring-4.5.jar"/>
 	<classpathentry kind="lib" path="dist/json.org.jar"/>
+	<classpathentry kind="lib" path="dist/c3p0-0.9.5.2-sources.jar"/>
+	<classpathentry kind="lib" path="dist/c3p0-0.9.5.2.jar" sourcepath="dist/c3p0-0.9.5.2-sources.jar"/>
+	<classpathentry kind="lib" path="dist/mchange-commons-java-0.2.11-sources.jar"/>
+	<classpathentry kind="lib" path="dist/mchange-commons-java-0.2.11.jar"/>
+	<classpathentry kind="lib" path="dist/mysql.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

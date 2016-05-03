@@ -21,13 +21,12 @@ public class Packet {
 	private String from;
 	
 	protected JSONObject jsonObject;	
-	public Packet() throws JSONException {
+	public Packet() {
 		// this.time = System.currentTimeMillis();
-		this(null);
+		this.time = System.currentTimeMillis();
 	}
 
-	public Packet(JSONObject jsonObject) throws JSONException {
-		
+	public Packet(JSONObject jsonObject) throws JSONException {		
 		if (jsonObject != null) {
 			this.jsonObject =jsonObject;
 			this.type = jsonObject.getString("type");
@@ -39,11 +38,21 @@ public class Packet {
 				// TODO Auto-generated catch block
 			//	e.printStackTrace();
 			}
-			this.from = jsonObject.getString("from");
-			this.to = jsonObject.getString("to");
+			try {
+				this.from = jsonObject.getString("from");
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+			//	e.printStackTrace();
+			}
+			try {
+				this.to = jsonObject.getString("to");
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+			//	e.printStackTrace();
+			}			
 		}else
 		{
-			this.time = System.currentTimeMillis();
+			throw new JSONException("jsonObject NULL");
 		}
 	}
 

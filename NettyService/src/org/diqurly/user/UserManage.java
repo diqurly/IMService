@@ -4,16 +4,13 @@ import io.netty.channel.Channel;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.diqurly.config.ConfigConst;
 import org.diqurly.connect.ConnectInfo;
 import org.diqurly.packet.Error;
 import org.diqurly.packet.Pressence;
 import org.diqurly.util.MemoryUtil;
-import org.json.JSONException;
 
 /**
  * 用户管理类，管理用户在线
@@ -64,13 +61,8 @@ public class UserManage<E extends Channel> {
 //		cacheUsers = new ConcurrentSkipListMap<E, String>();
 //		userInfos = new ConcurrentSkipListMap<String, UserInfo<E>>();
 		cacheUsers = new ConcurrentHashMap<E, String>();
-		userInfos = new ConcurrentHashMap<String, UserInfo<E>>();
-		try {
+		userInfos = new ConcurrentHashMap<String, UserInfo<E>>();	
 			errorMsg = new Error(1300).toJson();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -91,12 +83,7 @@ public class UserManage<E extends Channel> {
 	 */
 	public boolean login(E connect, UserSerializable userSeria) {
 		Pressence pressence = null;
-		try {
 			pressence = new Pressence();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		boolean isSuccess = false;
 		if (userSeria.getConnectType() == 1) {
 			isSuccess = pawCheck(connect, userSeria, pressence);
@@ -197,12 +184,7 @@ public class UserManage<E extends Channel> {
 		// 查找数据库进行密码校验
 
 		if (!"123456".equals(password)) {
-			try {
 				connect.writeAndFlush(new Error(1200).toJson());
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			connect.close();
 			return false;
 		}
@@ -247,16 +229,11 @@ public class UserManage<E extends Channel> {
 			Pressence pressence) {
 		// 重连校验
 
-		//根据用户ID　获取connect.
+		// 根据用户ID　获取connect.
 
 		UserInfo<E> userInfo = userInfos.get(userSeria.getUserID());
 		if (userInfo == null) {
-			try {
-				connect.writeAndFlush(new Error(1301).toJson());
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			connect.writeAndFlush(new Error(1301).toJson());
 			connect.close();
 			return false;
 		}
@@ -276,12 +253,7 @@ public class UserManage<E extends Channel> {
 			}
 		}
 		if (!isCheck) {
-			try {
-				connect.writeAndFlush(new Error(1301).toJson());
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			connect.writeAndFlush(new Error(1301).toJson());
 			connect.close();
 			return false;
 		}

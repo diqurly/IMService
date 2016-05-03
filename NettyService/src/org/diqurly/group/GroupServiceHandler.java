@@ -2,17 +2,17 @@ package org.diqurly.group;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import org.diqurly.config.ConfigConst;
 import org.diqurly.connect.ConnectManage;
+import org.diqurly.handler.DhandlerInterface;
 import org.diqurly.service.ServiceSerializable;
 /**
  * 群消息交流
  * @author diqurly
  *
  */
-public class GroupServiceHandler extends ChannelInboundHandlerAdapter {
+public class GroupServiceHandler extends DhandlerInterface {
 	
 
 	private ConnectManage<Channel> connectMange;
@@ -30,10 +30,17 @@ public class GroupServiceHandler extends ChannelInboundHandlerAdapter {
 			if(info.getRole()==ConfigConst.DISTRIBUTED_GROUP)
 			{
 				//校验
+				info.getCheckCode();//根据数据库信息进行比对。
+				
+				//正确
+				connectMange.rmCacheCo(ctx.channel());
+				
+				//错误
+				remove(ctx.channel());
 			}else
 				remove(ctx.channel());
 		} else if (connectMange.isCheck(ctx.channel())) {
-//消息接收解析
+			//消息接收解析
 			
 			
 		} else {
@@ -87,6 +94,12 @@ public class GroupServiceHandler extends ChannelInboundHandlerAdapter {
 	{
 		connectMange.rmCacheCo(connect);
 		connectMange.rmConnect(connect);
+	}
+
+	@Override
+	public DhandlerInterface newHandler() {
+		// TODO Auto-generated method stub
+		return new GroupServiceHandler(connectMange);
 	}
 	
 }

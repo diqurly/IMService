@@ -5,13 +5,10 @@ import io.netty.channel.Channel;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import org.diqurly.component.Component;
+import org.diqurly.component.AbstractMessageRoute;
 import org.diqurly.component.ComponentService;
 import org.diqurly.config.ConfigConst;
 import org.diqurly.connect.ConnectInfo;
@@ -30,22 +27,19 @@ import org.diqurly.user.UserManage;
  * @param <E>
  *
  */
-public class MessageRoute<E extends Channel> extends ComponentService{
+public class MessageRoute<E extends Channel> extends AbstractMessageRoute {
 	private ConnectManage<E> connectMange;
 	private UserManage<E> userManage;
-	
-	private HashMap<String, Component> components=new HashMap<String, Component>();
-	//private BlockingQueue<Packet> packetQueue;
-	
-	
-	private BlockingQueue<Packet> queue=new ArrayBlockingQueue<Packet>(2000);
-	
-	
-	//用线程组来对消息的转发？？数量为CPU/3个为零则默认为一个
-	ThreadGroup tg=new ThreadGroup("forward group");
-	
-	public MessageRoute(ConnectManage<E> connectMange,
-			UserManage<E> userManage) {
+
+	private HashMap<String, ComponentService> components = new HashMap<String, ComponentService>();
+	// private BlockingQueue<Packet> packetQueue;
+
+	private BlockingQueue<Packet> queue = new ArrayBlockingQueue<Packet>(2000);
+
+	// 用线程组来对消息的转发？？数量为CPU/3个为零则默认为一个
+	ThreadGroup tg = new ThreadGroup("forward group");
+
+	public MessageRoute(ConnectManage<E> connectMange, UserManage<E> userManage) {
 		this.connectMange = connectMange;
 		this.userManage = userManage;
 		// this.packetQueue = packetQueue;
@@ -63,11 +57,11 @@ public class MessageRoute<E extends Channel> extends ComponentService{
 						}
 					}
 				}
-			}, "forward-" + i).start();;
+			}, "forward-" + i).start();
+			;
 		}
 
 	}
-	
 
 	private void msgRoute(Message message) {
 		String type = message.getType();
@@ -119,32 +113,45 @@ public class MessageRoute<E extends Channel> extends ComponentService{
 
 	}
 
+	/**
+	 * 转发给对应角色服务器
+	 * 
+	 * @param role
+	 * @param msg
+	 */
 	private void routeSend(int role, String msg) {
 		connectMange.getChannel(role).writeAndFlush(msg);
 	}
 
-	private Component getComponent(String name)
-	{
-		return	components.get(name);
-	}
-	
-	public void registerComponent(String name ,Component com)
-	{
-		components.put(name, com);
-	}
-	public void removeComponent(String name)
-	{
-		components.remove(name);
+	private ComponentService getComponent(String name) {
+		return components.get(name);
 	}
 
+	/**
+	 * 注册组件
+	 * 
+	 * @param com
+	 *            组件类
+	 */
+	public void registerComponent(ComponentService com) {
+		components.put(com.getName(), com);
+	}
+
+	/**
+	 * 移除组件
+	 * 
+	 * @param com
+	 *            组件类
+	 */
+	public void removeComponent(ComponentService com) {
+		components.remove(com.getName());
+	}
 
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
 		return "MessageRoute";
 	}
-
-
 
 	@Override
 	public void sendBlock(Packet packet) throws InterruptedException {
@@ -157,6 +164,7 @@ public class MessageRoute<E extends Channel> extends ComponentService{
 		// TODO Auto-generated method stub
 		return queue.offer(packet);
 	}
+
 	public void packagePacket(Packet packet) {
 		// TODO Auto-generated method stub
 
@@ -170,43 +178,50 @@ public class MessageRoute<E extends Channel> extends ComponentService{
 				preRoute((Pressence) packet);
 			}
 		} else {
-			// 接收组件
-			// 判断该组件是否存在
-			// 组件存在消息转发给对应组件
-			// 不合法则return;
-			Component component;
-			try {
-				component = getComponent(com);
-			} catch (Exception e) {
-				// TODO: handle exception
-				return;
+
+			// 判断是否开启集群
+			if (ConfigConst.ISDISTRIBUTED) {
+				// 转发给群服务器
+				
+				//判断组件名称是否注册，否则断开，是则转发
+				
+				routeSend(ConfigConst.DISTRIBUTED_GROUP, packet.toJson());
+			} else {
+				// 转发给群类
+				// 接收组件
+				// 判断该组件是否存在
+				// 组件存在消息转发给对应组件
+				// 不合法则return;
+				ComponentService component;
+				try {
+					component = getComponent(com);
+				} catch (Exception e) {
+					// TODO: handle exception
+					return;
+				}
+				if (component != null) {
+					component.packagePacket(packet, queue);
+				}
 			}
-			if (component != null) {
-				component.packagePacket(packet, queue);
-			}
+
 		}
 
 	}
-	
 
-	
-	private int getThreas()
-	{
-		int threas = Runtime.getRuntime().availableProcessors()/3;
-		if(threas<=0)
-			threas=1;
+	private int getThreas() {
+		int threas = Runtime.getRuntime().availableProcessors() / 3;
+		if (threas <= 0)
+			threas = 1;
 		return threas;
-		
-	}
 
-	
+	}
 
 	/**
 	 * 消息转发给客户端
+	 * 
 	 * @param packet
 	 */
-	private void packetRoute(Packet packet)
-	{
+	private void packetRoute(Packet packet) {
 		String msg = packet.toJson();
 		String to = packet.getTo();
 		// 接收者比对，是否在缓存中
@@ -234,8 +249,7 @@ public class MessageRoute<E extends Channel> extends ComponentService{
 				// 离线保存
 			}
 		}
-		
+
 	}
-	
-	
+
 }
