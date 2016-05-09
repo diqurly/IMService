@@ -1,8 +1,8 @@
 package org.diqurly.service;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -19,7 +19,9 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import javax.net.ssl.SSLException;
 
 import org.diqurly.config.ConfigConst;
-import org.diqurly.user.UserSerializable;
+import org.diqurly.connect.listening.ConnectListening;
+import org.diqurly.handler.DChandlerInterface;
+import org.diqurly.handler.DhandlerInterface;
 
 /**
  * 分布 ，集群连接类
@@ -27,7 +29,7 @@ import org.diqurly.user.UserSerializable;
  * @author diqurly
  *
  */
-public class ClientBC {
+public class ClientBC implements ConnectListening<Channel>{
 
 	private String host;
 	private int port;
@@ -36,7 +38,7 @@ public class ClientBC {
 	private Bootstrap b;
 	private ChannelFuture f;
 	private EventLoopGroup group;
-	private ChannelHandler handler;
+	private DChandlerInterface handler;
 
 	/**
 	 * 
@@ -51,8 +53,8 @@ public class ClientBC {
 	 * @throws InterruptedException
 	 * @throws SSLException
 	 */
-	public ClientBC(boolean SSL, String host, int port, ChannelHandler handler)
-			throws SSLException {
+	public ClientBC(boolean SSL, String host, int port,
+			DChandlerInterface handler) throws SSLException {
 		this.host = host;
 		this.port = port;
 		this.SSL = SSL;
@@ -60,15 +62,15 @@ public class ClientBC {
 
 	}
 
-	public ClientBC(String host, int port, ChannelHandler handler)
+	public ClientBC(String host, int port, DChandlerInterface handler)
 			throws SSLException {
 		this(false, host, port, handler);
 
 	}
 
 	private void init() throws SSLException {
+		handler.addConnectListening(this);
 		if (SSL) {
-
 			sslCtx = SslContext
 					.newClientContext(InsecureTrustManagerFactory.INSTANCE);
 		} else {
@@ -87,7 +89,8 @@ public class ClientBC {
 							p.addLast(sslCtx.newHandler(ch.alloc(), host, port));
 						}
 						p.addLast(new ObjectEncoder(), new ObjectDecoder(
-								ClassResolvers.cacheDisabled(null)), handler);
+								ClassResolvers.cacheDisabled(null)), handler
+								.newHandler());
 					}
 				});
 
@@ -109,7 +112,7 @@ public class ClientBC {
 			info.setRole(ConfigConst.DISTRIBUTED_ROLE);
 			info.setTime(System.currentTimeMillis());
 			f.channel().writeAndFlush(info);
-			f.channel().closeFuture().sync();// 阻塞  //连接关闭后不会立即断开，需要等上一会
+			f.channel().closeFuture().sync();// 阻塞 //连接关闭后不会立即断开，需要等上一会
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -134,6 +137,10 @@ public class ClientBC {
 		} finally {
 			// Shut down the event loop to terminate all threads.
 			group.shutdownGracefully();
+			group = null;
+			sslCtx = null;
+			b = null;
+			f = null;
 		}
 
 	}
@@ -143,23 +150,27 @@ public class ClientBC {
 	 * 
 	 * @throws Exception
 	 */
-	public void reConnect() throws Exception {
-		try {
-			f.channel().close().sync();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			// Shut down the event loop to terminate all threads.
-			group.shutdownGracefully();
-		}
+	public void reConnect() {
+		disConnect();
 		try {
 			init();
 			connect();
-		} catch (SSLException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void connect(Channel connect) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void disconnect(Channel connect) {
+		// TODO Auto-generated method stub
+			reConnect();
 	}
 
 }

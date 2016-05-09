@@ -1,79 +1,72 @@
 package org.diqurly.group;
 
-import java.util.concurrent.BlockingQueue;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
+import java.util.concurrent.BlockingQueue;
+
 import org.diqurly.config.ConfigConst;
 import org.diqurly.connect.ConnectManage;
+import org.diqurly.connect.listening.ConnectListening;
+import org.diqurly.handler.DChandlerInterface;
 import org.diqurly.handler.DhandlerInterface;
-import org.diqurly.packet.Error;
 import org.diqurly.packet.Packet;
 import org.diqurly.packet.PacketPackage;
 import org.diqurly.service.ServiceSerializable;
+
 /**
- * 与群服务器数据交流
+ * C
  * 
- * {@value
- * 作用：只需要被动的接收群服务器传过来的数据即可，不需要主动的与群服务器进行交流（发送心跳？判断是否断开）。
- * 只需要一个群连接管理即可（HashSet<?>）
- * }
  * @author diqurly
  *
  */
-public class GroupServiceHandler extends DhandlerInterface {
-	
+public class GroupClientHandler extends DChandlerInterface {
 
 	private ConnectManage<Channel> connectMange;
 	private BlockingQueue<Packet> queue;
 
-	public GroupServiceHandler(ConnectManage<Channel> connectMange, BlockingQueue<Packet> queue) {
+	public GroupClientHandler(ConnectManage<Channel> connectMange,
+			BlockingQueue<Packet> queue) {
 		this.connectMange = connectMange;
-		this.queue=queue;
+		this.queue = queue;
+	}
+
+	public GroupClientHandler(ConnectManage<Channel> connectMange,
+			BlockingQueue<Packet> queue, ConnectListening<Channel> connectListen) {
+		this.connectMange = connectMange;
+		this.queue = queue;
+		this.connectListen = connectListen;
+	}
+
+	public void channelActive(ChannelHandlerContext ctx) {
+		ServiceSerializable info = new ServiceSerializable();
+		info.setTime(System.currentTimeMillis());
+		info.setRole(ConfigConst.DISTRIBUTED_GROUP);
+		info.setCheckCode(ConfigConst.GROUP_CHECK_CODE);
+		ctx.writeAndFlush(info);
+		// System.out.println("channelActive");
+	}
+
+	@Override
+	public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+		// TODO Auto-generated method stub
+		super.handlerRemoved(ctx);
 	}
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg)
 			throws Exception {
 		// TODO Auto-generated method stub
-		if (msg instanceof ServiceSerializable) {
-			ServiceSerializable info=(ServiceSerializable)msg;
-			if(info.getRole()==ConfigConst.DISTRIBUTED_GROUP)
-			{
-				//校验
-				if(ConfigConst.GROUP_CHECK_CODE.equals(info.getCheckCode()))//根据数据库信息进行比对。
-				{
-					//正确
-					connectMange.addGroupConnect(ctx.channel());
-					connectMange.rmCacheCo(ctx.channel());
-				}else
-				{
-					//错误
-					remove(ctx.channel());
-				}				
-			}else
-				remove(ctx.channel());
-		} else if (connectMange.existGroupConnect(ctx.channel())) {
-			//消息接收解析
-			
-			//1群消息的转发
-			
-			//2心跳回执
-			
 
-			Packet packet = PacketPackage.packageing(msg.toString(),
-					ctx.channel());
-			if (packet != null) {
-				if(!queue.offer(packet))
-				{
-					//添加失败
-					ctx.writeAndFlush(new Error(2100).toJson());
-					//告知客户端此条消息发送失败，请等待。
-				}
-			}
-		} else {
-			remove(ctx.channel());
+		Packet packet = PacketPackage.packageing(msg.toString(), ctx.channel());
+		if (packet != null) {
+			queue.put(packet);
+			// if(!queue.offer(packet))
+			// {
+			// //添加失败
+			// ctx.writeAndFlush(new Error(2100).toJson());
+			// //告知客户端此条消息发送失败，请等待。
+			// }
 		}
 	}
 
@@ -86,13 +79,14 @@ public class GroupServiceHandler extends DhandlerInterface {
 	@Override
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
 		// TODO Auto-generated method stub
-		connectMange.addCacheCo(ctx.channel());		
+		connectMange.addChannel(ConfigConst.DISTRIBUTED_GROUP, ctx.channel());
 	}
 
 	@Override
 	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
 		// TODO Auto-generated method stub
-		remove(ctx.channel());
+		connectMange.rmChannel(ConfigConst.DISTRIBUTED_GROUP);
+		connectListen.disconnect(ctx.channel());
 	}
 
 	@Override
@@ -107,8 +101,8 @@ public class GroupServiceHandler extends DhandlerInterface {
 			throws Exception {
 		// TODO Auto-generated method stub
 		cause.printStackTrace();
-	//	ctx.close();
-		remove(ctx.channel());
+		// ctx.close();
+		connectMange.rmChannel(ConfigConst.DISTRIBUTED_GROUP);
 	}
 
 	@Override
@@ -118,17 +112,10 @@ public class GroupServiceHandler extends DhandlerInterface {
 		super.userEventTriggered(ctx, evt);
 	}
 
-	
-	private void remove(Channel connect)
-	{
-		connectMange.rmCacheCo(connect);
-		connectMange.removeGroupConnect(connect);
-	}
-
 	@Override
 	public DhandlerInterface newHandler() {
 		// TODO Auto-generated method stub
-		return new GroupServiceHandler(connectMange,queue);
+		return new GroupClientHandler(connectMange, queue, connectListen);
 	}
-	
+
 }

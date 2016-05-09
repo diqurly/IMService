@@ -22,6 +22,10 @@ public class ConnectManage<E extends Channel> {
 	private ConcurrentSkipListSet<E> connects;
 	// 查找对应角色的服务器，用于不同服务器之间消息转发
 	private ConcurrentHashMap<Integer, E> services;
+	// 群服务器连接管理
+	private ConcurrentSkipListSet<E> groupConnects;
+	// 其它服务器连接管理
+	private ConcurrentSkipListSet<E> otherConnects;
 
 	
 	
@@ -37,6 +41,9 @@ public class ConnectManage<E extends Channel> {
 		cacheConnects = new ConcurrentHashMap<E, Long>();
 		connects = new ConcurrentSkipListSet<E>();
 		services = new ConcurrentHashMap<Integer, E>();
+		
+		groupConnects= new ConcurrentSkipListSet<E>();
+		otherConnects= new ConcurrentSkipListSet<E>();
 	}
 
 	/**
@@ -133,5 +140,74 @@ public class ConnectManage<E extends Channel> {
 	 */
 	public boolean existRole(int role) {
 		return services.contains(role);
+	}
+	/**
+	 * 群服务器连接是否存在
+	 * @param connect
+	 * @return
+	 */
+	public boolean existGroupConnect(E connect)
+	{
+	return	groupConnects.contains(connect);
+	}
+	/**
+	 * 添加通过验证的群服务器连接
+	 * @param connect
+	 */
+	public void addGroupConnect(E connect)
+	{
+		groupConnects.add(connect);
+	}
+	/**
+	 * 移除群服务器连接
+	 * @param connect
+	 */
+	public void removeGroupConnect(E connect)
+	{
+		groupConnects.remove(connect);
+		connect.close();
+	}
+	/**
+	 * 获取群服务器连接
+	 * @return
+	 */
+	public ConcurrentSkipListSet<E> getGroupConnects()
+	{
+		return groupConnects;
+	}
+	
+	/**
+	 * 其它服务器连接是否存在
+	 * @param connect
+	 * @return
+	 */
+	public boolean existOtherConnect(E connect)
+	{
+	return	otherConnects.contains(connect);
+	}
+	/**
+	 * 添加通过验证的其它服务器连接
+	 * @param connect
+	 */
+	public void addOtherConnect(E connect)
+	{
+		otherConnects.add(connect);
+	}
+	/**
+	 * 移除其它服务器连接
+	 * @param connect
+	 */
+	public void removeOtherConnect(E connect)
+	{
+		otherConnects.remove(connect);
+		connect.close();
+	}
+	/**
+	 * 获取其它服务器连接
+	 * @return
+	 */
+	public ConcurrentSkipListSet<E> getOtherConnects()
+	{
+		return otherConnects;
 	}
 }
