@@ -77,7 +77,11 @@ public class ConfigConst {
 	/**
 	 * CS服务器连接校验码
 	 */
-	public static final String PROT_C = "--c2s-check-code";
+	public static final String CODE_P = "--c2s-check-code";
+	/**
+	 * 是否开启ssl
+	 */
+	public static final String SSL_P = "--c2s-ssl";
 	/**
 	 * 其它业务服务器数据交流端口
 	 */
@@ -85,7 +89,11 @@ public class ConfigConst {
 	/**
 	 * 其它业务服务器连接校验码
 	 */
-	public static final String O_PROT_C = "--o2s-check-code";
+	public static final String O_CODE_P = "--o2s-check-code";
+	/**
+	 * 是否开启ssl
+	 */
+	public static final String O_SSL_P = "--o2s-ssl";
 	/**
 	 * 群服务器数据交流端口
 	 */
@@ -93,7 +101,11 @@ public class ConfigConst {
 	/**
 	 * 群服务器连接校验码
 	 */
-	public static final String G_PROT_C = "--g2s-check-code";
+	public static final String G_CODE_P = "--g2s-check-code";
+	/**
+	 * 是否开启ssl
+	 */
+	public static final String G_SSL_P = "--g2s-ssl";
 	/**
 	 * 群服务器地址
 	 */
@@ -107,6 +119,10 @@ public class ConfigConst {
 	 */
 	public static final String GROUP_SERVICE_CODE = "--group-service-code";
 	/**
+	 * 群服务器ssl连接
+	 */
+	public static final String GROUP_SERVICE_SSL = "--group-service-ssl";
+	/**
 	 * 状态服务器地址
 	 */
 	public static final String STATUS_SERVICE_URL = "--status-service-url";
@@ -119,6 +135,10 @@ public class ConfigConst {
 	 */
 	public static final String STATUS_SERVICE_CODE = "--status-service-code";
 	/**
+	 * 状态服务器ssl连接
+	 */
+	public static final String STATUS_SERVICE_SSL = "--status-service-ssl";
+	/**
 	 * 其它业务服务器地址
 	 */
 	public static final String OTHER_SERVICE_URL = "--other-service-url";
@@ -130,6 +150,11 @@ public class ConfigConst {
 	 * 其它业务连接校验码
 	 */
 	public static final String OTHER_SERVICE_CODE = "--other-service-code";
+	/**
+	 * 其它业务连接校验码
+	 */
+	public static final String OTHER_SERVICE_SSL = "--other-service-ssl";
+	
 	
 	
 	/**

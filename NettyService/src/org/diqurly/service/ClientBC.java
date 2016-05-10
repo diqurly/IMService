@@ -21,7 +21,6 @@ import javax.net.ssl.SSLException;
 import org.diqurly.config.ConfigConst;
 import org.diqurly.connect.listening.ConnectListening;
 import org.diqurly.handler.DChandlerInterface;
-import org.diqurly.handler.DhandlerInterface;
 
 /**
  * 分布 ，集群连接类
@@ -58,6 +57,7 @@ public class ClientBC implements ConnectListening<Channel>{
 		this.host = host;
 		this.port = port;
 		this.SSL = SSL;
+		this.handler=handler;
 		init();
 
 	}
@@ -108,10 +108,10 @@ public class ClientBC implements ConnectListening<Channel>{
 		// Start the client.
 		try {
 			f = b.connect(host, port).sync();
-			ServiceSerializable info = new ServiceSerializable();
-			info.setRole(ConfigConst.DISTRIBUTED_ROLE);
-			info.setTime(System.currentTimeMillis());
-			f.channel().writeAndFlush(info);
+//			ServiceSerializable info = new ServiceSerializable();
+//			info.setRole(ConfigConst.DISTRIBUTED_ROLE);
+//			info.setTime(System.currentTimeMillis());
+//			f.channel().writeAndFlush(info);
 			f.channel().closeFuture().sync();// 阻塞 //连接关闭后不会立即断开，需要等上一会
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -123,6 +123,14 @@ public class ClientBC implements ConnectListening<Channel>{
 
 	}
 
+	/**
+	 * 获取管道
+	 * 
+	 * @return
+	 */
+	public Channel getChannel() {
+		return f.channel();
+	}
 	/**
 	 * 关闭，关闭进行中时将处于阻塞状态
 	 * 

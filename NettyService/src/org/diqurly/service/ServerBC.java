@@ -2,7 +2,6 @@ package org.diqurly.service;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -47,9 +46,13 @@ public class ServerBC {
 
 	public ServerBC(int port, DhandlerInterface handler)
 			throws CertificateException, SSLException {
-		this(1, 0, false, port, handler);
+		this(false, port, handler);
 	}
 
+	public ServerBC(boolean SSL, int port, DhandlerInterface handler)
+			throws CertificateException, SSLException {
+		this(1, 0, SSL, port, handler);
+	}
 	public ServerBC(int sThreads, int cThreads, boolean SSL, int port,
 			DhandlerInterface handler) throws CertificateException, SSLException {
 		this.sThreads = sThreads;
