@@ -2,6 +2,7 @@ package org.diqurly.cs;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.ReferenceCountUtil;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -30,6 +31,7 @@ public class CsServiceHandler extends DhandlerInterface{
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg)
 			throws Exception {
+		
 		// TODO Auto-generated method stub
 		if (msg instanceof ServiceSerializable) {
 			ServiceSerializable info=(ServiceSerializable)msg;
@@ -69,6 +71,8 @@ public class CsServiceHandler extends DhandlerInterface{
 		} else {
 			remove(ctx.channel());
 		}
+		//为什么要使用这句，网上说法是释放msg资源，面对内存爆满。
+		ReferenceCountUtil.release(msg);
 	}
 
 	@Override

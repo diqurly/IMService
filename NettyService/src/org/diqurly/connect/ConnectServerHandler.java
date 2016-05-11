@@ -2,6 +2,7 @@ package org.diqurly.connect;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.ReferenceCountUtil;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -59,6 +60,8 @@ public class ConnectServerHandler extends DhandlerInterface {
 			ctx.close();
 			userManage.loginOut(ctx.channel());
 		}
+		//为什么要使用这句，网上说法是释放msg资源，面对内存爆满。
+				ReferenceCountUtil.release(msg);
 	}
 
 	@Override
